@@ -107,6 +107,19 @@ def get_conn():
     global _conn
     with _lock:
         if _conn is None:
+            # Ensure the parent directory of DB_PATH exists (Render free plan
+            # has no persistent disk, so DB_PATH may point at a path whose
+            # directory doesn't exist yet). Fall back to /tmp if unwritable.
+            parent = os.path.dirname(os.path.abspath(DB_PATH))
+            try:
+                os.makedirs(parent, exist_ok=True)
+                # Probe writability by touching the file path.
+                open(DB_PATH, "a").close()
+            except (OSError, PermissionError):
+                # Fall back to a writable temp location so the app still boots.
+                fallback = os.path.join("/tmp", os.path.basename(DB_PATH) or "grid.db")
+                globals()["DB_PATH"] = fallback
+                print(f"[db] DB_PATH {DB_PATH!r} not writable; using {fallback!r}", flush=True)
             c = sqlite3.connect(DB_PATH, check_same_thread=False)
             c.row_factory = sqlite3.Row
             c.execute("PRAGMA journal_mode=WAL")

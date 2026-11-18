@@ -7,12 +7,12 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn -w 4 -b 0.0.0.0:$PORT app:app
     healthCheckPath: /
-    disk:
-      name: grid-data
-      mountPath: /var/data
-      sizeGB: 1
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+      # SQLite file inside the container's working directory.
+      # Render's free plan has no persistent disk, so the DB is rebuilt on
+      # every deploy / spin-down — fine for the demo. db.py auto-creates the
+      # parent dir and falls back to /tmp if the path is not writable.
       - key: DB_PATH
-        value: /var/data/grid.db
+        value: /data/grid.db
