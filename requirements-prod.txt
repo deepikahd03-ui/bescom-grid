@@ -1,0 +1,2 @@
+# Production WSGI server (Render/Railway/Fly auto-detect via Procfile)
+gunicorn>=21.2

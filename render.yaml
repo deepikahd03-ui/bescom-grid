@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: bescom-fault-to-recovery
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 4 -b 0.0.0.0:$PORT app:app
+    healthCheckPath: /
+    disk:
+      name: grid-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DB_PATH
+        value: /var/data/grid.db
